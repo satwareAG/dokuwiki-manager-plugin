@@ -11,7 +11,7 @@ const config = {
     wikiUrl: 'http://localhost:8080',
     username: 'admin',
     password: 'DevTest2025!',
-    authMethod: 'BASIC_AUTH',  // This was missing! Required by the auth module
+    authMethod: 'BASIC_AUTH',
     defaultNamespace: ''
 };
 
@@ -56,8 +56,25 @@ async function testDokuWikiAPI() {
                 namespace: '',
                 depth: 1
             });
+
             console.log('Pages:');
-            pages.forEach(page => console.log(`- ${page}`));
+            if (Array.isArray(pages)) {
+                pages.forEach((page, index) => {
+                    // Handle different possible return formats
+                    if (typeof page === 'string') {
+                        console.log(`- ${page}`);
+                    } else if (typeof page === 'object') {
+                        const pageId = page.id || page.page || `Page ${index + 1}`;
+                        const pageSize = page.size || 'unknown size';
+                        const pageMtime = page.mtime ? new Date(page.mtime * 1000).toLocaleString() : 'unknown date';
+                        console.log(`- ${pageId} (${pageSize} bytes, last modified: ${pageMtime})`);
+                    } else {
+                        console.log(`- ${String(page)}`);
+                    }
+                });
+            } else {
+                console.log('No pages found or unexpected result format:', pages);
+            }
         } catch (error) {
             const enhancedError = handleDokuWikiError(error);
             console.error(`Error listing pages: ${enhancedError.userMessage || error.message}`);
