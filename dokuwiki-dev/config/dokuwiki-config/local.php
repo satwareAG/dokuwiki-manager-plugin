@@ -22,4 +22,5 @@ $conf['xmlrpc'] = 1;
 $conf['remotecors'] = '*';
 
 // Easy debugging
-$conf['allowdebug'] = 1;
+$conf['allowdebug'] = 1;$conf['savedir'] = '/app/www/public/data';
+$conf['remoteuser'] = '';              // Allow any authenticated user
