@@ -2,9 +2,91 @@
   "version": 1,
   "uuid": "dokuwiki-manager-typingmind-plugin",
   "iconURL": "https://www.dokuwiki.org/lib/tpl/dokuwiki/images/logo.png",
-  "emoji": "📝",
+  "emoji": "📚",
   "title": "DokuWiki Manager",
-  "userSettings": "[{\"name\":\"wikiUrl\",\"label\":\"DokuWiki URL\",\"type\":\"text\",\"required\":true,\"description\":\"The full URL to your DokuWiki instance (e.g., https://wiki.example.com)\"},{\"name\":\"username\",\"label\":\"Username\",\"type\":\"text\",\"required\":true,\"description\":\"Your DokuWiki username\"},{\"name\":\"password\",\"label\":\"Password\",\"type\":\"password\",\"required\":true,\"description\":\"Your DokuWiki password\"},{\"name\":\"defaultNamespace\",\"label\":\"Default Namespace\",\"type\":\"text\",\"description\":\"Optional default namespace for operations\"}]",
-  "openaiSpec": "{\"name\":\"manage_dokuwiki\",\"parameters\":{\"type\":\"object\",\"required\":[\"operation\"],\"properties\":{\"operation\":{\"type\":\"string\",\"description\":\"The operation to perform on the DokuWiki instance\",\"enum\":[\"get_page\",\"save_page\",\"append_page\",\"list_pages\",\"search_pages\",\"get_page_info\",\"get_page_history\",\"list_media\",\"get_media\",\"save_media\",\"delete_media\"]},\"pageId\":{\"type\":\"string\",\"description\":\"The ID of the wiki page to operate on\"},\"mediaId\":{\"type\":\"string\",\"description\":\"The ID of the media file to operate on\"},\"content\":{\"type\":\"string\",\"description\":\"The content to write to the page or file\"},\"namespace\":{\"type\":\"string\",\"description\":\"The namespace to list pages or media from\"},\"searchQuery\":{\"type\":\"string\",\"description\":\"The search query for finding pages\"}}},\"description\":\"Manage DokuWiki websites through the JSON-RPC API. Perform operations on wiki pages and media files.\"}",
+  "userSettings": [
+    {
+      "name": "wikiUrl",
+      "label": "DokuWiki URL",
+      "type": "text",
+      "required": true,
+      "description": "The full URL to your DokuWiki instance (e.g., https://wiki.example.com)"
+    },
+    {
+      "name": "authMethod",
+      "label": "Authentication Method",
+      "type": "enum",
+      "required": true,
+      "values": ["BASIC_AUTH", "BEARER_TOKEN"],
+      "description": "Choose authentication method (Basic Auth for username/password or Bearer Token for token-based auth)"
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "type": "text",
+      "required": false,
+      "description": "Your DokuWiki username (only required for Basic Auth)"
+    },
+    {
+      "name": "password",
+      "label": "Password/Token",
+      "type": "password",
+      "required": true,
+      "description": "Your DokuWiki password (for Basic Auth) or Bearer token (for Token Auth)"
+    },
+    {
+      "name": "defaultNamespace",
+      "label": "Default Namespace",
+      "type": "text",
+      "description": "Optional default namespace for operations"
+    }
+  ],
+  "openaiSpec": {
+    "name": "manage_dokuwiki",
+    "parameters": {
+      "type": "object",
+      "required": ["operation"],
+      "properties": {
+        "operation": {
+          "type": "string",
+          "description": "The operation to perform on the DokuWiki instance",
+          "enum": [
+            "get_page",
+            "save_page",
+            "append_page",
+            "list_pages",
+            "search_pages",
+            "get_page_info",
+            "get_page_history",
+            "list_media",
+            "get_media",
+            "save_media",
+            "delete_media"
+          ]
+        },
+        "pageId": {
+          "type": "string",
+          "description": "The ID of the wiki page to operate on"
+        },
+        "mediaId": {
+          "type": "string",
+          "description": "The ID of the media file to operate on"
+        },
+        "content": {
+          "type": "string",
+          "description": "The content to write to the page or file"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "The namespace to list pages or media from"
+        },
+        "searchQuery": {
+          "type": "string",
+          "description": "The search query for finding pages"
+        }
+      }
+    },
+    "description": "Manage DokuWiki websites through the JSON-RPC API. Perform operations on wiki pages and media files."
+  },
   "implementationType": "javascript"
 }
