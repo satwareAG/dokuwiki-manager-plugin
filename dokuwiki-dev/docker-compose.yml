@@ -1,0 +1,17 @@
+version: '3'
+services:
+  dokuwiki:
+    image: lscr.io/linuxserver/dokuwiki:latest
+    container_name: dokuwiki_dev
+    environment:
+      - PUID=1000  # Update with your user ID (run 'id -u' to find)
+      - PGID=1000  # Update with your group ID (run 'id -g' to find)
+      - TZ=Europe/Berlin  # Update with your timezone
+      - PHP_MEMORYLIMIT=512M
+    volumes:
+      - ./data:/config
+      # This maps the parent directory (your plugin) to the DokuWiki plugins directory
+      - ..:/config/plugins/dokuwiki-manager
+    ports:
+      - 8080:80
+    restart: unless-stopped

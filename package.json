@@ -6,7 +6,10 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "lint": "eslint --ext .js .",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "dev": "node ./examples/test-client.js"
   },
   "repository": {
     "type": "git",
@@ -26,8 +29,13 @@
   },
   "homepage": "https://github.com/satwareAG/dokuwiki-manager-plugin#readme",
   "devDependencies": {
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-jest": "^28.11.0",
     "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0"
+    "jest-environment-jsdom": "^29.7.0",
+    "node-fetch": "^2.7.0",
+    "prettier": "^3.5.3"
   },
   "jest": {
     "testEnvironment": "jsdom",

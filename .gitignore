@@ -2,6 +2,8 @@
 node_modules/
 jspm_packages/
 
+package-lock.json
+
 # Optional npm cache directory
 .npm
 
@@ -18,3 +20,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+# Local DokuWiki instance data
+/dokuwiki-test/
+# DokuWiki development environment data
+/dokuwiki-dev/data/
+
+# Keep Docker Compose files and scripts
+!/dokuwiki-dev/docker-compose.yml
+!/dokuwiki-dev/start.sh
+!/dokuwiki-dev/stop.sh
