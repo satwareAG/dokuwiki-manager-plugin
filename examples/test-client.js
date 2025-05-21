@@ -11,6 +11,7 @@ const config = {
     wikiUrl: 'http://localhost:8080',
     username: 'admin',
     password: 'DevTest2025!',
+    authMethod: 'BASIC_AUTH',  // This was missing! Required by the auth module
     defaultNamespace: ''
 };
 
