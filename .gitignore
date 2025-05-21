@@ -7,8 +7,16 @@ package-lock.json
 # Optional npm cache directory
 .npm
 
-# Editor directories and files
+# IntelliJ IDEA - ignore user-specific files, but keep shared configurations
 .idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries
+.idea/shelf
+*.iws
+
+
+# Editor directories and files
 .vscode/
 *.swp
 *.swo

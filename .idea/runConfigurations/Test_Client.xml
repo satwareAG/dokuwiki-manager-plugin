@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Test Client" type="NodeJSConfigurationType" path-to-js-file="examples/test-client.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>
