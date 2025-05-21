@@ -1,0 +1,47 @@
+{
+  "name": "dokuwiki-manager-plugin",
+  "version": "1.0.0",
+  "description": "A TypingMind plugin for managing DokuWiki websites",
+  "main": "implementation.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/satwareAG/dokuwiki-manager-plugin.git"
+  },
+  "keywords": [
+    "dokuwiki",
+    "typingmind",
+    "plugin",
+    "wiki",
+    "json-rpc"
+  ],
+  "author": "satware AG",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/satwareAG/dokuwiki-manager-plugin/issues"
+  },
+  "homepage": "https://github.com/satwareAG/dokuwiki-manager-plugin#readme",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "implementation.js"
+    ]
+  }
+}
