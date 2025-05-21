@@ -8,7 +8,7 @@ package-lock.json
 .npm
 
 # Editor directories and files
-.idea/
+.idea/workspace.xml
 .vscode/
 *.swp
 *.swo
