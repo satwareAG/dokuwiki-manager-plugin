@@ -7,16 +7,39 @@ A powerful plugin for managing DokuWiki websites directly from TypingMind. This 
 - **Page Operations**: Get, create, edit, and search wiki pages
 - **Media Operations**: List, upload, download, and delete media files
 - **Information Retrieval**: Get page history, metadata, and search content
-- **Secure Authentication**: Basic authentication with your DokuWiki credentials
+- **Secure Authentication**: Support for both Basic Authentication and Bearer Token authentication
 
 ## Setup
 
 1. **Import the Plugin** into your TypingMind workspace
 2. **Configure the Plugin** with your DokuWiki credentials:
    - **DokuWiki URL**: The full URL to your DokuWiki instance (e.g., `https://wiki.example.com`)
-   - **Username**: Your DokuWiki username
-   - **Password**: Your DokuWiki password
+   - **Authentication Method**: Choose between Basic Auth (username/password) or Bearer Token
+   - **Username**: Your DokuWiki username (required for Basic Auth)
+   - **Password/Token**: Your DokuWiki password (for Basic Auth) or Bearer token (for Token Auth)
    - **Default Namespace** (optional): Default namespace for operations
+
+## Authentication Methods
+
+The plugin supports two authentication methods:
+
+### Basic Authentication
+
+Uses username and password for authentication. This is the standard method for most DokuWiki installations.
+
+Requirements:
+- DokuWiki URL
+- Username
+- Password
+
+### Bearer Token Authentication
+
+Uses a bearer token for authentication. This is useful for applications or services that use token-based authentication.
+
+Requirements:
+- DokuWiki URL
+- Bearer Token (in the password field)
+- No username required
 
 ## Usage Examples
 
@@ -69,7 +92,7 @@ Show me all media files in the "documentation" namespace of my DokuWiki
 
 ## Limitations
 
-- This plugin requires valid DokuWiki user credentials with appropriate permissions
+- This plugin requires valid DokuWiki credentials with appropriate permissions
 - Operations are limited to the permissions of the provided user account
 - Large media files may encounter issues with browser limitations
 
@@ -79,9 +102,25 @@ Your DokuWiki credentials are stored in your TypingMind account and are transmit
 
 ## Troubleshooting
 
-- **Authentication Errors**: Verify your username and password
+- **Authentication Errors**: Verify your username and password, or check that your token is valid
 - **Permission Errors**: Ensure your user has the necessary permissions in DokuWiki
 - **Connection Errors**: Verify the DokuWiki URL is correct and accessible
+- **Token Issues**: Bearer tokens may expire; generate a new token if necessary
+
+## Development
+
+This plugin is structured in a modular way:
+
+- `src/auth.js`: Authentication module supporting both Basic Auth and Bearer Token
+- `src/apiClient.js`: API client for communicating with DokuWiki JSON-RPC API
+- `src/errorHandler.js`: Error handling for user-friendly error messages
+- `implementation.js`: Main entry point for the plugin
+
+To run tests:
+
+```
+npm test
+```
 
 ## License
 
