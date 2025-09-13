@@ -6,18 +6,30 @@
  * License: MIT
  */
 
-// Main function that will be called by TypingMind
+// Import modules
+const { apiClient } = require('./src/index');
+const { handleApiError, getRecoverySuggestion } = require('./src/errorHandler');
+
+/**
+ * Main entry point for the DokuWiki Manager plugin
+ * Called by Typing Mind when the plugin is invoked
+ * 
+ * @param {Object} params - Parameters from the plugin function specification
+ * @param {Object} userSettings - User settings from the plugin configuration
+ * @returns {any} - Result of the operation
+ * @throws {Error} - If the operation fails
+ */
 async function manage_dokuwiki(params, userSettings) {
-  // Parameter validation
-  if (!params.operation) {
-    throw new Error("Operation parameter is required");
-  }
-
-  // Authenticate and create the JSON-RPC client
-  const client = await createJsonRpcClient(userSettings);
-
-  // Route to the appropriate handler based on the operation
   try {
+    // Validate operation parameter
+    if (!params || !params.operation) {
+      throw new Error("Operation parameter is required");
+    }
+    
+    // Create and initialize the API client
+    const client = await apiClient.createApiClient(userSettings);
+
+    // Route to the appropriate handler based on the operation
     switch (params.operation) {
       case "get_page":
         return await getPage(params, client);
@@ -26,7 +38,7 @@ async function manage_dokuwiki(params, userSettings) {
       case "append_page":
         return await appendPage(params, client);
       case "list_pages":
-        return await listPages(params, client);
+        return await listPages(params, client, userSettings);
       case "search_pages":
         return await searchPages(params, client);
       case "get_page_info":
@@ -34,7 +46,7 @@ async function manage_dokuwiki(params, userSettings) {
       case "get_page_history":
         return await getPageHistory(params, client);
       case "list_media":
-        return await listMedia(params, client);
+        return await listMedia(params, client, userSettings);
       case "get_media":
         return await getMedia(params, client);
       case "save_media":
@@ -45,102 +57,15 @@ async function manage_dokuwiki(params, userSettings) {
         throw new Error(`Unsupported operation: ${params.operation}`);
     }
   } catch (error) {
-    // Enhanced error handling
-    if (error.code) {
-      // Handle specific DokuWiki API error codes
-      handleDokuWikiError(error);
+    // Enhance error with recovery suggestions
+    const enhancedError = handleApiError(error);
+    const suggestion = getRecoverySuggestion(enhancedError);
+    
+    if (suggestion) {
+      enhancedError.message += `\n\nPossible solution: ${suggestion}`;
     }
-    throw error;
-  }
-}
-
-// Helper Functions
-
-/**
- * Create a JSON-RPC client with authentication
- */
-async function createJsonRpcClient(userSettings) {
-  const { wikiUrl, username, password } = userSettings;
-  
-  if (!wikiUrl) {
-    throw new Error("DokuWiki URL is required in the plugin settings");
-  }
-  
-  if (!username || !password) {
-    throw new Error("DokuWiki username and password are required in the plugin settings");
-  }
-
-  // Create a basic client object with auth details
-  const client = {
-    baseUrl: wikiUrl.endsWith('/') ? `${wikiUrl}lib/exe/jsonrpc.php` : `${wikiUrl}/lib/exe/jsonrpc.php`,
-    auth: `Basic ${btoa(`${username}:${password}`)}`,
-    async call(method, params = {}) {
-      const response = await fetch(this.baseUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': this.auth
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: Date.now(),
-          method: method,
-          params: params
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.error) {
-        const error = new Error(result.error.message);
-        error.code = result.error.code;
-        throw error;
-      }
-
-      return result.result;
-    }
-  };
-
-  // Test the connection
-  try {
-    await client.call('core.getWikiTitle');
-    return client;
-  } catch (error) {
-    throw new Error(`Failed to connect to DokuWiki: ${error.message}`);
-  }
-}
-
-/**
- * Handle DokuWiki-specific error codes
- */
-function handleDokuWikiError(error) {
-  // Map of DokuWiki error codes to user-friendly messages
-  const errorMap = {
-    0: "Success",
-    111: "You are not allowed to read this page",
-    121: "The requested page (revision) does not exist",
-    131: "Empty or invalid page ID given",
-    132: "Refusing to write an empty new wiki page",
-    133: "The page is currently locked",
-    134: "The page content was blocked",
-    211: "You are not allowed to read this media file",
-    212: "You are not allowed to delete this media file",
-    221: "The requested media file (revision) does not exist",
-    231: "Empty or invalid media ID given",
-    232: "Media file is still referenced",
-    233: "Failed to delete media file",
-    234: "Invalid base64 encoded data",
-    235: "Empty file given",
-    236: "Failed to save media"
-  };
-
-  // Enhance the error message if we have a specific message for this code
-  if (errorMap[error.code]) {
-    error.message = `${errorMap[error.code]} (Code: ${error.code})`;
+    
+    throw enhancedError;
   }
 }
 
@@ -155,12 +80,12 @@ async function getPage(params, client) {
   try {
     const result = await client.call('core.getPage', {
       page: params.pageId,
-      rev: params.revision || 0
+      rev: params.rev || 0
     });
 
     return result;
   } catch (error) {
-    // Specific handling for get_page errors
+    // Special handling for non-existent pages
     if (error.code === 121) {
       return ""; // Return empty string for non-existent pages (matches DokuWiki behavior)
     }
@@ -183,7 +108,7 @@ async function savePage(params, client) {
     page: params.pageId,
     text: params.content,
     summary: params.summary || "",
-    isminor: params.isMinor || false
+    isminor: params.minor || false
   });
 }
 
@@ -202,21 +127,22 @@ async function appendPage(params, client) {
     page: params.pageId,
     text: params.content,
     summary: params.summary || "",
-    isminor: params.isMinor || false
+    isminor: params.minor || false
   });
 }
 
 /**
  * List pages in a namespace
  */
-async function listPages(params, client) {
+async function listPages(params, client, userSettings) {
   const namespace = params.namespace || userSettings?.defaultNamespace || "";
   const depth = params.depth || 1;
+  const includeHash = params.include_hash || false;
 
   const result = await client.call('core.listPages', {
     namespace: namespace,
     depth: depth,
-    hash: false
+    hash: includeHash
   });
 
   return result;
@@ -226,12 +152,14 @@ async function listPages(params, client) {
  * Search pages by content
  */
 async function searchPages(params, client) {
-  if (!params.searchQuery) {
+  if (!params.searchQuery && !params.query) {
     throw new Error("Search query is required for search_pages operation");
   }
 
+  const query = params.query || params.searchQuery;
+
   const result = await client.call('core.searchPages', {
-    query: params.searchQuery
+    query: query
   });
 
   return result;
@@ -247,9 +175,9 @@ async function getPageInfo(params, client) {
 
   const result = await client.call('core.getPageInfo', {
     page: params.pageId,
-    rev: params.revision || 0,
-    author: true,
-    hash: false
+    rev: params.rev || 0,
+    author: params.include_author || false,
+    hash: params.include_hash || false
   });
 
   return result;
@@ -274,16 +202,17 @@ async function getPageHistory(params, client) {
 /**
  * List media files in a namespace
  */
-async function listMedia(params, client) {
+async function listMedia(params, client, userSettings) {
   const namespace = params.namespace || userSettings?.defaultNamespace || "";
   const depth = params.depth || 1;
   const pattern = params.pattern || "";
+  const includeHash = params.include_hash || false;
 
   const result = await client.call('core.listMedia', {
     namespace: namespace,
     pattern: pattern,
     depth: depth,
-    hash: false
+    hash: includeHash
   });
 
   return result;
@@ -299,7 +228,7 @@ async function getMedia(params, client) {
 
   const result = await client.call('core.getMedia', {
     media: params.mediaId,
-    rev: params.revision || 0
+    rev: params.rev || 0
   });
 
   return result;
@@ -312,13 +241,16 @@ async function saveMedia(params, client) {
   if (!params.mediaId) {
     throw new Error("Media ID is required for save_media operation");
   }
-  if (!params.content) {
+  
+  // Check for content parameter (support both content and base64_content)
+  const base64Content = params.base64_content || params.content;
+  if (!base64Content) {
     throw new Error("Content (base64 encoded) is required for save_media operation");
   }
 
   const result = await client.call('core.saveMedia', {
     media: params.mediaId,
-    base64: params.content,
+    base64: base64Content,
     overwrite: params.overwrite || false
   });
 
